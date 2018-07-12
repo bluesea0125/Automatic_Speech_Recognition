@@ -1,12 +1,21 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : __init__.py
-# Description  : libraries of models
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' deep residual model for automatic speech recognition implemented in Tensorflow
+author:
 
-from speechvalley.models.dynamic_brnn import DBiRNN 
-from speechvalley.models.deepSpeech2 import DeepSpeech2
-from speechvalley.models.capsuleNetwork import CapsuleLayer, CapsuleNetwork
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
+      #        ###            #        ###           ###        I#        #:     
+      #      ###              #      I##;             ##;       ##       ##      
+            ###                     ###               !##      ####      #       
+           ###                     ###                 ###    ## ###    #'       
+         !##;                    `##%                   ##;  ##   ###  ##        
+        ###                     ###                     $## `#     ##  #         
+       ###        #            ###        #              ####      ####;         
+     `###        -#           ###        `#               ###       ###          
+     ##############          ##############               `#         #     
+     
+date:2016-11-07
+'''
+
+import sys
+sys.path.append('../')

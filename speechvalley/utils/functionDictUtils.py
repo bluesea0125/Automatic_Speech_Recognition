@@ -1,14 +1,23 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : functionDictUtils.py
-# Description  : Common function dictionaries for Automatic Speech Recognition
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Function dict for convenience
 
+author(s):
+zzw922cn
+     
+date:2017-4-15
+'''
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
 
 import tensorflow as tf 
+from models.resnet import ResNet
+from models.brnn import BiRNN
+from models.dynamic_brnn import DBiRNN
+
+model_functions_dict = {'ResNet': ResNet, 'BiRNN': BiRNN, 'DBiRNN': DBiRNN}
 
 activation_functions_dict = {
     'sigmoid': tf.sigmoid, 'tanh': tf.tanh, 'relu': tf.nn.relu, 'relu6': tf.nn.relu6,

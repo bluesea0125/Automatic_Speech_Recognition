@@ -1,11 +1,16 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : taskUtils.py
-# Description  : Utils function for Automatic Speech Recognition
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
+
+author(s):
+zzw922cn
+         
+date:2017-4-15
+'''
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
 
 import os
 
@@ -30,7 +35,7 @@ def check_path_exists(path):
                 os.makedirs(p)
     else:
         if not os.path.exists(path):
-            os.makedirs(path)
+            os.makrdirs(path)
 
 class dotdict(dict):
     __getattr__ = dict.get

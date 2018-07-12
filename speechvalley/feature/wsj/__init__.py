@@ -1,13 +1,22 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : __init__.py
-# Description  : Feature preprocessing for WSJ dataset
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
+author:
 
-from speechvalley.feature.wsj.extract_wsj import extract 
-from speechvalley.feature.wsj.rename_wsj import renameCD
-from speechvalley.feature.wsj.split_data_by_s5 import split_data_by_s5
-from speechvalley.feature.wsj.wsj_preprocess import wav2feature
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
+      #        ###            #        ###           ###        I#        #:     
+      #      ###              #      I##;             ##;       ##       ##      
+            ###                     ###               !##      ####      #       
+           ###                     ###                 ###    ## ###    #'       
+         !##;                    `##%                   ##;  ##   ###  ##        
+        ###                     ###                     $## `#     ##  #         
+       ###        #            ###        #              ####      ####;         
+     `###        -#           ###        `#               ###       ###          
+     ##############          ##############               `#         #     
+     
+date:2017-4-15
+'''
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True

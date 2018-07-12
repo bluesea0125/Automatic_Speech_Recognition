@@ -1,12 +1,22 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : __init__.py
-# Description  : Feature preprocessing library for Automatic Speech Recognition
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
+author:
 
-from speechvalley.feature.libri import wav2feature as libri_wav2feature
-from speechvalley.feature.timit import wav2feature as timit_wav2feature
-from speechvalley.feature.wsj import wav2feature as wsj_wav2feature
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
+      #        ###            #        ###           ###        I#        #:     
+      #      ###              #      I##;             ##;       ##       ##      
+            ###                     ###               !##      ####      #       
+           ###                     ###                 ###    ## ###    #'       
+         !##;                    `##%                   ##;  ##   ###  ##        
+        ###                     ###                     $## `#     ##  #         
+       ###        #            ###        #              ####      ####;         
+     `###        -#           ###        `#               ###       ###          
+     ##############          ##############               `#         #     
+     
+date:2017-4-15
+'''
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True

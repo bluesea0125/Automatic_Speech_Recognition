@@ -1,21 +1,30 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : libri_preprocess.py
-# Description  : Feature preprocessing for LibriSpeech dataset
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
 
+author:
+zzw922cn
+hiteshpaul
+date:2017-5-09
+'''
+
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import sys
+sys.path.append('../')
+
+from core.sigprocess import *
+from core.calcmfcc import calcfeat_delta_delta
+import scipy.io.wavfile as wav
+import numpy as np
 import os
+import cPickle
 import glob
 import sklearn
 import argparse
-import numpy as np
-import scipy.io.wavfile as wav
 from sklearn import preprocessing
 from subprocess import check_call, CalledProcessError
-from speechvalley.feature.core import calcfeat_delta_delta
 
 def preprocess(root_directory):
     """

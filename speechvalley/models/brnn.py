@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-''' dynamic bidirectional rnn model for automatic speech recognition implemented in Tensorflow
+''' bidirectional rnn model for automatic speech recognition implemented in Tensorflow
 author:
 
       iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
@@ -30,8 +30,10 @@ from functools import wraps
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.ops import ctc_ops as ctc
 from tensorflow.contrib.rnn.python.ops import rnn_cell
-from tensorflow.contrib.rnn.python.ops import core_rnn_cell_impl
+
+bidirectional_rnn = tf.contrib.rnn.static_bidirectional_rnn
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
 
 from utils.utils import load_batched_data
@@ -40,52 +42,40 @@ from utils.utils import setAttrs
 from utils.utils import build_weight
 from utils.utils import build_forward_layer
 from utils.utils import build_conv_layer
-from utils.utils import list_to_sparse_tensor
-from utils.utils import dropout
-from utils.utils import get_edit_distance
 
 
-def build_multi_dynamic_brnn(args,
-                             maxTimeSteps,
-                             inputX,
-                             cell_fn,
-                             seqLengths,
-                             time_major=True):
-    hid_input = inputX
+def build_multi_brnn(args,
+                     maxTimeSteps,
+                     inputList,
+                     cell_fn,
+                     seqLengths):
+    hid_input = inputList
     for i in range(args.num_layer):
-        scope = 'DBRNN_' + str(i + 1)
+        scope = 'BRNN_' + str(i + 1)
+
         forward_cell = cell_fn(args.num_hidden, activation=args.activation)
         backward_cell = cell_fn(args.num_hidden, activation=args.activation)
-        # tensor of shape: [max_time, batch_size, input_size]
-        outputs, output_states = bidirectional_dynamic_rnn(forward_cell, backward_cell,
-                                                           inputs=hid_input,
-                                                           dtype=tf.float32,
-                                                           sequence_length=seqLengths,
-                                                           time_major=True,
-                                                           scope=scope)
-        # forward output, backward ouput
-        # tensor of shape: [max_time, batch_size, input_size]
-        output_fw, output_bw = outputs
-        # forward states, backward states
-        output_state_fw, output_state_bw = output_states
-        # output_fb = tf.concat(2, [output_fw, output_bw])
-        output_fb = tf.concat([output_fw, output_bw], 2)
-        shape = output_fb.get_shape().as_list()
-        output_fb = tf.reshape(output_fb, [shape[0], shape[1], 2, int(shape[2] / 2)])
-        hidden = tf.reduce_sum(output_fb, 2)
-        hidden = dropout(hidden, args.keep_prob, (args.mode == 'train'))
+        fbH, f_state, b_state = bidirectional_rnn(forward_cell, backward_cell,
+                                                  hid_input, dtype=tf.float32,
+                                                  sequence_length=seqLengths, scope=scope)
 
+        fbHrs = [tf.reshape(t, [args.batch_size, 2, args.num_hidden]) for t in fbH]
         if i != args.num_layer - 1:
-            hid_input = hidden
-        else:
-            outputXrs = tf.reshape(hidden, [-1, args.num_hidden])
-            # output_list = tf.split(0, maxTimeSteps, outputXrs)
-            output_list = tf.split(outputXrs, maxTimeSteps, 0)
-            fbHrs = [tf.reshape(t, [args.batch_size, args.num_hidden]) for t in output_list]
+            # output size is seqlength*batchsize*2*hidden
+            output = tf.convert_to_tensor(fbHrs, dtype=tf.float32)
+
+            # output size is seqlength*batchsize*hidden
+            output = tf.reduce_sum(output, 2)
+            print(output.get_shape().as_list())
+
+            # outputXrs is of size [seqlenth*batchsize,num_hidden]
+            outputXrs = tf.reshape(output, [-1, args.num_hidden])
+            hid_input = tf.split(outputXrs, maxTimeSteps, 0)  # convert inputXrs from [32*maxL,39] to [32,maxL,39]
+
     return fbHrs
 
 
-class DBiRNN(object):
+class BiRNN(object):
     def __init__(self, args, maxTimeSteps):
         self.args = args
         self.maxTimeSteps = maxTimeSteps
@@ -94,9 +84,9 @@ class DBiRNN(object):
         elif args.rnncell == 'gru':
             self.cell_fn = tf.contrib.rnn.GRUCell
         elif args.rnncell == 'lstm':
-            self.cell_fn = core_rnn_cell_impl.BasicLSTMCell
+            self.cell_fn = rnn_cell.BasicLSTMCell
         else:
-            raise Exception("rnncell type not supported: {}".format(args.rnncell))
+            raise Exception("model type not supported: {}".format(args.model))
         self.build_graph(args, maxTimeSteps)
 
     @describe
@@ -105,8 +95,8 @@ class DBiRNN(object):
         with self.graph.as_default():
             self.inputX = tf.placeholder(tf.float32,
                                          shape=(maxTimeSteps, args.batch_size, args.num_feature))  # [maxL,32,39]
+            # self.inputXX = tf.reshape(self.inputX,shape=(args.batch_size,maxTimeSteps,args.num_feature))
             inputXrs = tf.reshape(self.inputX, [-1, args.num_feature])
-            # self.inputList = tf.split(0, maxTimeSteps, inputXrs) #convert inputXrs from [32*maxL,39] to [32,maxL,39]
             self.inputList = tf.split(inputXrs, maxTimeSteps, 0)  # convert inputXrs from [32*maxL,39] to [32,maxL,39]
             self.targetIxs = tf.placeholder(tf.int64)
             self.targetVals = tf.placeholder(tf.int32)
@@ -120,19 +110,22 @@ class DBiRNN(object):
                            'num_class': args.num_class,
                            'activation': args.activation,
                            'optimizer': args.optimizer,
-                           'learning rate': args.learning_rate,
-                           'keep prob': args.keep_prob,
-                           'batch size': args.batch_size}
+                           'learning rate': args.learning_rate}
 
-            fbHrs = build_multi_dynamic_brnn(self.args, maxTimeSteps, self.inputX, self.cell_fn, self.seqLengths)
+            fbHrs = build_multi_brnn(self.args, maxTimeSteps, self.inputList, self.cell_fn, self.seqLengths)
             with tf.name_scope('fc-layer'):
                 with tf.variable_scope('fc'):
+                    weightsOutH1 = tf.Variable(tf.truncated_normal([2, args.num_hidden], name='weightsOutH1'))
+                    biasesOutH1 = tf.Variable(tf.zeros([args.num_hidden]), name='biasesOutH1')
                     weightsClasses = tf.Variable(
                         tf.truncated_normal([args.num_hidden, args.num_class], name='weightsClasses'))
                     biasesClasses = tf.Variable(tf.zeros([args.num_class]), name='biasesClasses')
-                    logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in fbHrs]
+                    outH1 = [tf.reduce_sum(tf.multiply(t, weightsOutH1), reduction_indices=1) + biasesOutH1 for t in
+                             fbHrs]
+                    logits = [tf.matmul(t, weightsClasses) + biasesClasses for t in outH1]
             logits3d = tf.stack(logits)
-            self.loss = tf.reduce_mean(tf.nn.ctc_loss(self.targetY, logits3d, self.seqLengths))
+            self.loss = tf.reduce_mean(ctc.ctc_loss(self.targetY, logits3d, self.seqLengths))
+            # self.var_op = tf.all_variables()
             self.var_op = tf.global_variables()
             self.var_trainable_op = tf.trainable_variables()
 
@@ -144,9 +137,10 @@ class DBiRNN(object):
                 grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, self.var_trainable_op), args.grad_clip)
                 opti = tf.train.AdamOptimizer(args.learning_rate)
                 self.optimizer = opti.apply_gradients(zip(grads, self.var_trainable_op))
-            self.predictions = tf.to_int32(
-                tf.nn.ctc_beam_search_decoder(logits3d, self.seqLengths, merge_repeated=False)[0][0])
-            if args.level == 'cha':
-                self.errorRate = tf.reduce_sum(tf.edit_distance(self.predictions, self.targetY, normalize=True))
+            self.logitsMaxTest = tf.slice(tf.argmax(logits3d, 2), [0, 0], [self.seqLengths[0], 1])
+            self.predictions = tf.to_int32(ctc.ctc_beam_search_decoder(logits3d, self.seqLengths)[0][0])
+            self.errorRate = tf.reduce_sum(
+                tf.edit_distance(self.predictions, self.targetY, normalize=False)) / tf.to_float(
+                tf.size(self.targetY.values))
             self.initial_op = tf.global_variables_initializer()
             self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=5, keep_checkpoint_every_n_hours=1)

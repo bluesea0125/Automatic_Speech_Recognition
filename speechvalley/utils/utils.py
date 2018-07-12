@@ -1,11 +1,17 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : utils.py
-# Description  : Function utils library for Automatic Speech Recognition
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+
+''' This library provides some common functions
+author:
+zzw922cn
+liujq
+
+date:2016-11-09
+fix: 2017-5-13
+'''
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
 
 import time
 from functools import wraps
@@ -14,6 +20,7 @@ from glob import glob
 import numpy as np
 import tensorflow as tf
 import math
+
 
 def describe(func):
     ''' wrap function,to add some descriptions for function and its running time
@@ -114,7 +121,6 @@ def logging(model,logfile,errorRate,epoch=0,delta_time=0,mode='train'):
     if mode == 'config':
         with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
-
     elif mode == 'train':
         with open(logfile, "a") as myfile:
             myfile.write(str(time.strftime('%X %x %Z'))+'\n')
@@ -131,7 +137,6 @@ def logging(model,logfile,errorRate,epoch=0,delta_time=0,mode='train'):
         with open(logfile, "a") as myfile:
             myfile.write(str(model.config)+'\n')
             myfile.write(str(time.strftime('%X %x %Z'))+'\n')
-            myfile.write("development error rate:"+str(errorRate)+'\n')
 
 @describe
 def count_params(model, mode='trainable'):
@@ -161,18 +166,6 @@ def list_to_sparse_tensor(targetList, level):
        'oy', 'p', 'pau', 'pcl', 'q', 'r', 's',\
        'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux',\
        'v', 'w', 'y', 'z', 'zh']
-
-    mapping = {'ah': 'ax', 'ax-h': 'ax', 'ux': 'uw', 'aa': 'ao', 'ih': 'ix', \
-               'axr': 'er', 'el': 'l', 'em': 'm', 'en': 'n', 'nx': 'n',\
-               'eng': 'ng', 'sh': 'zh', 'hv': 'hh', 'bcl': 'h#', 'pcl': 'h#',\
-               'dcl': 'h#', 'tcl': 'h#', 'gcl': 'h#', 'kcl': 'h#',\
-               'q': 'h#', 'epi': 'h#', 'pau': 'h#'}
-
-    group_phn = ['ae', 'ao', 'aw', 'ax', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', \
-                 'er', 'ey', 'f', 'g', 'h#', 'hh', 'ix', 'iy', 'jh', 'k', 'l', \
-                 'm', 'n', 'ng', 'ow', 'oy', 'p', 'r', 's', 't', 'th', 'uh', 'uw',\
-                 'v', 'w', 'y', 'z', 'zh']
-
 
     mapping = {'ah': 'ax', 'ax-h': 'ax', 'ux': 'uw', 'aa': 'ao', 'ih': 'ix', \
                'axr': 'er', 'el': 'l', 'em': 'm', 'en': 'n', 'nx': 'n',\
@@ -276,13 +269,86 @@ def load_batched_data(mfccPath, labelPath, batchSize, mode, level):
        total number of samples (int)'''
     return data_lists_to_batches([np.load(os.path.join(mfccPath, fn)) for fn in os.listdir(mfccPath)],
                                  [np.load(os.path.join(labelPath, fn)) for fn in os.listdir(labelPath)],
-                                 batchSize, level) + (len(os.listdir(mfccPath)),)
+                                 batchSize, level) + \
+            (len(os.listdir(mfccPath)),)
 
 def list_dirs(mfcc_dir, label_dir):
     mfcc_dirs = glob(mfcc_dir)
     label_dirs = glob(label_dir)
     for mfcc,label in zip(mfcc_dirs,label_dirs):
         yield (mfcc,label)
+
+
+def build_weight(shape, name, func='he_normal', range=None):
+    """ Initializes weight.
+    supply following initialization:
+	xavier initialization
+	random normalization
+	uniform
+    We also add the L2 loss to weight for training.
+    """
+    if type(shape) is not list:
+        raise TypeError('shape must be a list')
+
+    initializer = tf.constant_initializer()
+    if func == 'xavier':
+        fan_in, fan_out = _get_dims(shape)
+        range = math.sqrt(6.0 / (fan_in + fan_out))
+        initializer = tf.random_uniform_initializer(-range, range)
+
+    elif func == 'he_normal':
+        fan_in, _ = _get_dims(shape)
+        std = math.sqrt(2.0 / fan_in)
+        initializer = tf.random_normal_initializer(stddev=std)
+
+    elif func == 'normal':
+        initializer = tf.random_normal_initializer(stddev=0.1)
+
+    elif func == 'uniform':
+        if range is None:
+            raise ValueError("range must be specified if you use uniform initialization")
+        initializer = tf.random_uniform_initializer(-range, range)
+
+    with tf.variable_scope(name or "weight_var"):
+        var = tf.get_variable(name, shape, initializer=initializer)
+    tf.add_to_collection('l2', tf.nn.l2_loss(var))
+    return var
+
+
+def build_forward_layer(inpt, shape, kernel='relu', name_scope='fc1'):
+    fc_w = build_weight(shape,name=name_scope+'_w')
+    fc_b = build_weight([shape[1]],name=name_scope+'_b')
+    if kernel == 'relu':
+        fc_h = tf.nn.relu(tf.matmul(inpt,fc_w) + fc_b)
+    elif kernel == 'elu':
+        fc_h = tf.nn.elu(tf.matmul(inpt,fc_w) + fc_b)
+    elif kernel == 'linear':
+        fc_h = tf.matmul(inpt,fc_w) + fc_b
+    return fc_h
+
+def build_conv_layer(inpt, filter_shape, stride,name=None):
+    ''' build a convolutional layer with batch normalization
+    '''
+    # BN->ReLU->conv
+    # 1.batch normalization
+    in_channels = filter_shape[2]
+    mean, var = tf.nn.moments(inpt, axes=[0,1,2])
+    with tf.variable_scope(name or "conv_layer"):
+        beta = tf.Variable(tf.zeros([in_channels]), name="beta")
+        gamma = build_weight([in_channels], name="gamma")
+    batch_normed = tf.nn.batch_normalization(
+    				inpt,
+				    mean, var,
+				    beta, gamma,
+				    0.001,
+				    name=name+'_bn')
+    # 2.relu
+    activated = tf.nn.relu(batch_normed)
+    # 3.convolution
+    filter_ = build_weight(filter_shape, name=name+'_filter')
+    output = tf.nn.conv2d(activated, filter=filter_, strides=[1, stride, stride, 1], padding='SAME')
+    output = tf.nn.dropout(output, keep_prob=0.6)
+    return output
 
 def batch_norm(x, is_training=True):
     """ Batch normalization.
@@ -321,3 +387,6 @@ def dropout(x, keep_prob, is_training):
     return tf.contrib.layers.dropout(x, keep_prob=keep_prob, is_training=is_training)
 
 
+# test code
+if __name__ == '__main__':
+    pass#print(len(phn))

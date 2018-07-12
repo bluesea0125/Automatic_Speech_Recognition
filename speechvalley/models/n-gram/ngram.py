@@ -1,12 +1,22 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : ngram.py
-# Description  : ngram model 
-# ******************************************************
+# -*- coding:utf-8 -*-
+#!/usr/bin/python
 
+''' Language modelling for automatic speech recognition based on n-gram
+author:
+
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!
+      #        ###            #        ###           ###        I#        #:
+      #      ###              #      I##;             ##;       ##       ##
+            ###                     ###               !##      ####      #
+           ###                     ###                 ###    ## ###    #'
+         !##;                    `##%                   ##;  ##   ###  ##
+        ###                     ###                     $## `#     ##  #
+       ###        #            ###        #              ####      ####;
+     `###        -#           ###        `#               ###       ###
+     ##############          ##############               `#         #
+
+date:2017-04-17
+'''
 import numpy as np
 import os
 import operator

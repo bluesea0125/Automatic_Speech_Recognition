@@ -1,10 +1,22 @@
 #-*- coding:utf-8 -*-
-#!/usr/bin/env python3
-""" Speech Valley
+#!/usr/bin/python
+''' Automatic Speech Recognition
+author:
 
-@author: zzw922cn
-@date: 2017-12-02
-"""
-from speechvalley.feature.core.calcmfcc import calcfeat_delta_delta, calcMFCC
-from speechvalley.feature.core.nist2wav import nist2wav
-from speechvalley.feature.core.spectrogram import spectrogramPower
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!    
+      #        ###            #        ###           ###        I#        #:     
+      #      ###              #      I##;             ##;       ##       ##      
+            ###                     ###               !##      ####      #       
+           ###                     ###                 ###    ## ###    #'       
+         !##;                    `##%                   ##;  ##   ###  ##        
+        ###                     ###                     $## `#     ##  #         
+       ###        #            ###        #              ####      ####;         
+     `###        -#           ###        `#               ###       ###          
+     ##############          ##############               `#         #     
+     
+date:2017-4-15
+'''
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True

@@ -1,14 +1,11 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : nist2wav.sh
-# Description  : 
+#!/bin/bash
+
+# author:Rongyi Lan
+# email:brianlanbo@gmail.com
+
 # This file is designed for converting NIST format audio
 # to WAV format audio, to run this script, you should install
 # libsndfile software first.
-# ******************************************************
 
 
 target_dir=$1

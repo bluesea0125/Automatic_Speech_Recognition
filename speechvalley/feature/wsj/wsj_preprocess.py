@@ -1,34 +1,46 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : wsj_preprocess.py
-# Description  : Feature preprocessing for WSJ dataset
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
 
+author:
+zzw922cn
 
+date:2017-5-5
+'''
+
+from __future__ import print_function
+#from __future__ import unicode_literals
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
+
+from core.sigprocess import *
+from core.calcmfcc import calcfeat_delta_delta
+import scipy.io.wavfile as wav
+import numpy as np
 import os
 import cPickle
 import glob
 import sklearn
 import argparse
-import numpy as np
-import scipy.io.wavfile as wav
 from sklearn import preprocessing
 from subprocess import check_call, CalledProcessError
-from speechvalley.feature.core import calcfeat_delta_delta
 
-def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, feature_len, seq2seq, save):
+
+def wav2feature(rootdir, save_dir, name, feature_len, win_len=0.02, win_step=0.01, mode='mfcc', seq2seq=False, save=False):
   """
   To run for WSJ corpus, you should download sph2pipe_v2.5 first!
   """
-  
+  feat_dir = os.path.join(save_dir, name, mode)
+  label_dir = os.path.join(save_dir, name, 'label')
+  if not os.path.exists(label_dir):
+    os.makedirs(label_dir)
+  if not os.path.exists(feat_dir):
+    os.makedirs(feat_dir)
 
   count = 0
-  dirid = 0
-  level = 'cha' if seq2seq is False else 'seq2seq'
-  for subdir, dirs, files in os.walk(root_directory):
+  for subdir, dirs, files in os.walk(rootdir):
     for f in files:
       fullFilename = os.path.join(subdir, f)
       filenameNoSuffix =  os.path.splitext(fullFilename)[0]
@@ -67,18 +79,9 @@ def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, f
           targets.append(29)
         targets = np.array(targets)
         print(targets)
+        count+=1
+        print('file index:', count)
         if save:
-          count += 1
-          if count%1000 == 0:
-              dirid += 1
-          print('file index:',count)
-          print('dir index:',dirid)
-          label_dir = os.path.join(save_directory, level, name, str(dirid), 'label')
-          feat_dir = os.path.join(save_directory, level, name, str(dirid), mode)
-          if not os.path.isdir(label_dir):
-              os.makedirs(label_dir)
-          if not os.path.isdir(feat_dir):
-              os.makedirs(feat_dir)
           featureFilename = os.path.join(feat_dir, filenameNoSuffix.split('/')[-1] +'.npy')
           np.save(featureFilename,feat)
           t_f = os.path.join(label_dir, filenameNoSuffix.split('/')[-1] +'.npy')
@@ -126,7 +129,7 @@ if __name__ == '__main__':
         save_directory = os.getcwd()
 
     if not os.path.isdir(root_directory):
-        raise ValueError("WSJ Directory does not exist!")
+        raise ValueError("LibriSpeech Directory does not exist!")
 
     if not os.path.isdir(save_directory):
         os.makedirs(save_directory)

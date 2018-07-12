@@ -1,12 +1,8 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : nist2wav.py
-# Description  : Converting nist format to wav format for Automatic Speech Recognition
-# ******************************************************
+#!/usr/bin/python
 
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
 
 import subprocess
 import os
@@ -21,5 +17,4 @@ def nist2wav(src_dir):
                 os.system("./sph2pipe_v2.5/sph2pipe "+fullFilename+" -f rif " +fullFilename+".wav")
                 print(fullFilename)
 
-if __name__ == '__main__':
-    nist2wav('/home/pony/wsj/')
+nist2wav('/home/frank/github/')

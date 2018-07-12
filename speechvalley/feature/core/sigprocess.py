@@ -1,11 +1,26 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : sigprocess.py
-# Description  : Handling signal
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+
+'''
+author:
+
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!
+      #        ###            #        ###           ###        I#        #:
+      #      ###              #      I##;             ##;       ##       ##
+            ###                     ###               !##      ####      #
+           ###                     ###                 ###    ## ###    #'
+         !##;                    `##%                   ##;  ##   ###  ##
+        ###                     ###                     $## `#     ##  #
+       ###        #            ###        #              ####      ####;
+     `###        -#           ###        `#               ###       ###
+     ##############          ##############               `#         #
+
+date:2016-11-09
+
+Liujq: Add English annotations.
+date:2017-05-08
+'''
+
 
 import numpy
 import math

@@ -1,11 +1,4 @@
 #!/bin/bash
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : run_timit.sh
-# Description  : excutable script for training on TIMIT dataset
-# ******************************************************
 
 for loop in {2..300} 
 do

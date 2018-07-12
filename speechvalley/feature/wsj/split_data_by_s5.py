@@ -1,23 +1,28 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : split_data_by_s5.py
-# Description  : Splitting data by s5 recipe
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
+author(s):
+zzw922cn
+     
+date:2017-5-5
 
-"""
-NOTE:
 we process the data using Kaldi s5 recipe
 train set: si284
 validation set: eval92
 test set: dev93
-"""
+'''
+
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
+
 
 import shutil
 import os
-from speechvalley.feature.core import check_path_exists
+from core.fileUtils import check_path_exists
 
 def split_data_by_s5(src_dir, des_dir, keywords=['train_si284', 'test_eval92', 'test_dev93']):
   count = 0

@@ -1,10 +1,12 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : __init__.py
-# Description  : Feature preprocessing for LibriSpeech dataset
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
+author:
+zzw922cn
+     
+date:2017-4-15
+'''
 
-from speechvalley.feature.libri.libri_preprocess import preprocess, wav2feature
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True

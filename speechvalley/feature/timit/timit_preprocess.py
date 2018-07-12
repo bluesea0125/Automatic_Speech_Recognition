@@ -1,13 +1,18 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : timit_preprocess.py
-# Description  : Feature preprocessing for TIMIT dataset
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition
 
-"""
+author(s):
+zzw922cn, nemik
+
+date:2017-4-15
+'''
+from __future__ import print_function
+from __future__ import unicode_literals
+import sys
+sys.path.append('../')
+
+'''
 Do MFCC over all *.wav files and parse label file Use os.walk to iterate all files in a root directory
 
 original phonemes:
@@ -15,19 +20,21 @@ original phonemes:
 phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
 
 mapped phonemes(For more details, you can read the main page of this repo):
-
 phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'epi', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'ix', 'iy', 'jh', 'k', 'l', 'm', 'n', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z', 'zh']
-"""
+'''
 
 import os
 import argparse
+from core.sigprocess import *
+from core.calcmfcc import calcfeat_delta_delta
+import scipy.io.wavfile as wav
+import numpy as np
 import glob
 import sys
 import sklearn
-import numpy as np
-import scipy.io.wavfile as wav
 from sklearn import preprocessing
-from speechvalley.feature.core import calcfeat_delta_delta, spectrogramPower
+from scikits.audiolab import Format, Sndfile
+from scikits.audiolab import wavread
 
 ## original phonemes
 phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi', 'er', 'ey', 'f', 'g', 'gcl', 'h#', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh', 'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl', 'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
@@ -35,9 +42,9 @@ phn = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl', 'ch'
 ## cleaned phonemes
 #phn = ['sil', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'ay', 'b', 'ch', 'd', 'dh', 'dx', 'eh', 'el', 'en', 'epi', 'er', 'ey', 'f', 'g', 'hh', 'ih', 'ix', 'iy', 'jh', 'k', 'l', 'm', 'n', 'ng', 'ow', 'oy', 'p', 'q', 'r', 's', 'sh', 't', 'th', 'uh', 'uw', 'v', 'w', 'y', 'z', 'zh']
 
-def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win_len, win_step,  seq2seq, save):
-    feat_dir = os.path.join(save_directory, level, keywords, mode)
-    label_dir = os.path.join(save_directory, level, keywords, 'label')
+def wav2feature(rootdir, save_directory, mode, feature_len,level, keywords, win_len, win_step,  seq2seq, save):
+    feat_dir = os.path.join(os.path.join(os.path.join(save_directory, level), keywords), mode)
+    label_dir = os.path.join(os.path.join(os.path.join(save_directory, level), keywords), 'label')
     if not os.path.exists(label_dir):
         os.makedirs(label_dir)
     if not os.path.exists(feat_dir):
@@ -54,8 +61,10 @@ def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win
                     (rate,sig)= wav.read(fullFilename)
                 except ValueError as e:
                     if e.message == "File format 'NIST'... not understood.":
-                        print('You should use nist2wav.sh to convert NIST format files to WAV files first, nist2wav.sh is in core folder.')
-                        return
+                        sf = Sndfile(fullFilename, 'r')
+                        nframes = sf.nframes
+                        sig = sf.read_frames(nframes)
+                        rate = sf.samplerate
                 feat = calcfeat_delta_delta(sig,rate,win_length=win_len,win_step=win_step,mode=mode,feature_len=feature_len)
                 feat = preprocessing.scale(feat)
                 feat = np.transpose(feat)
@@ -102,10 +111,10 @@ def wav2feature(rootdir, save_directory, mode, feature_len, level, keywords, win
                 count+=1
                 print('file index:',count)
                 if save:
-                    featureFilename = feat_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
+                    featureFilename = os.path.join(feat_dir,filenameNoSuffix.split('/')[-1]+'.npy')
                     np.save(featureFilename,feat)
-                    labelFilename = label_dir + filenameNoSuffix.split('/')[-2]+'-'+filenameNoSuffix.split('/')[-1]+'.npy'
-                    print(labelFilename)
+                    labelFilename = os.path.join(label_dir,filenameNoSuffix.split('/')[-1]+'.npy')
+                    print(featureFilename,labelFilename)
                     np.save(labelFilename,phenome)
 
 
@@ -115,15 +124,14 @@ if __name__ == '__main__':
                                      description="""
                                      Script to preprocess timit data
                                      """)
-    parser.add_argument("path", help="Directory where Timit dataset is contained", type=str)
-    parser.add_argument("save", help="Directory where preprocessed arrays are to be saved",
-                        type=str)
+    parser.add_argument("--path", help="Directory where Timit dataset is contained", type=str)
+    parser.add_argument("--save", help="Directory where preprocessed arrays are to be saved", type=str)
     parser.add_argument("-n", "--name", help="Name of the dataset",
                         choices=['train', 'test'],
                         type=str, default='train')
     parser.add_argument("-l", "--level", help="Level",
                         choices=['cha', 'phn'],
-                        type=str, default='cha')
+                        type=str, default='phn')
     parser.add_argument("-m", "--mode", help="Mode",
                         choices=['mfcc', 'fbank'],
                         type=str, default='mfcc')
@@ -137,8 +145,8 @@ if __name__ == '__main__':
                         default=0.01, help="specify the window step length of feature")
 
     args = parser.parse_args()
-    root_directory = args.path
-    save_directory = args.save
+    root_directory = args.path#'/home/frank/github/data/TIMIT'#junying-todo
+    save_directory = args.save#'/home/frank/github/data/TIMIT/DATA'#junying-todo
     level = args.level
     mode = args.mode
     feature_len = args.featlen
@@ -147,6 +155,13 @@ if __name__ == '__main__':
     win_len = args.winlen
     win_step = args.winstep
 
+    # level = 'cha'
+    # # train or test dataset
+    # keywords = 'train'
+    # mode = 'mfcc'
+    # feat_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, mode)
+    # label_dir = os.path.join('/home/pony/github/data/timit/', level, keywords, 'label')
+    # rootdir = os.path.join('/media/pony/DLdigest/study/ASR/corpus/TIMIT', keywords)
     root_directory = os.path.join(root_directory, name)
     if root_directory == ".":
         root_directory = os.getcwd()

@@ -1,26 +1,48 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : libri_train.py
-# Description  : Training models on LibriSpeech dataset for Automatic Speech Recognition
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Automatic Speech Recognition for TIMIT corpus
+
+Support for LibriSpeech will come soon. 
+author(s):
+zzw922cn
+     
+date:2017-4-15
+'''
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
 
 import time
 import datetime
 import os
 from six.moves import cPickle
 from functools import wraps
-import random
 
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops import ctc_ops as ctc
+from tensorflow.contrib.rnn.python.ops.core_rnn import static_bidirectional_rnn
 
-from speechvalley.utils import load_batched_data, describe, describe, getAttrs, output_to_sequence, list_dirs, logging, count_params, target2phoneme, get_edit_distance, get_num_classes, check_path_exists, dotdict, activation_functions_dict, optimizer_functions_dict
-from speechvalley.models import DBiRNN, DeepSpeech2
+from utils.utils import load_batched_data
+from utils.utils import describe
+from utils.utils import getAttrs
+from utils.utils import output_to_sequence
+from utils.utils import list_dirs
+from utils.utils import logging
+from utils.utils import count_params
+from utils.utils import target2phoneme
+from utils.utils import get_edit_distance
+from utils.taskUtils import get_num_classes
+from utils.taskUtils import check_path_exists
+from utils.taskUtils import dotdict
+from utils.functionDictUtils import model_functions_dict
+from utils.functionDictUtils import activation_functions_dict
+from utils.functionDictUtils import optimizer_functions_dict
 
+from models.resnet import ResNet
+from models.brnn import BiRNN
+from models.dynamic_brnn import DBiRNN
 
 from tensorflow.python.platform import flags
 from tensorflow.python.platform import app
@@ -39,7 +61,6 @@ flags.DEFINE_string('rnncell', 'lstm', 'set the rnncell to use, rnn, gru, lstm..
 flags.DEFINE_integer('num_layer', 2, 'set the layers for rnn')
 flags.DEFINE_string('activation', 'tanh', 'set the activation to use, sigmoid, tanh, relu, elu...')
 flags.DEFINE_string('optimizer', 'adam', 'set the optimizer to use, sgd, adam...')
-flags.DEFINE_boolean('layerNormalization', False, 'set whether to apply layer normalization to rnn cell')
 
 flags.DEFINE_integer('batch_size', 64, 'set the batch size')
 flags.DEFINE_integer('num_hidden', 256, 'set the hidden size of rnn cell')
@@ -61,7 +82,7 @@ dev_dataset = FLAGS.dev_dataset
 test_dataset = FLAGS.test_dataset
 
 level = FLAGS.level
-model_fn = DBiRNN
+model_fn = model_functions_dict[FLAGS.model]
 rnncell = FLAGS.rnncell
 num_layer = FLAGS.num_layer
 
@@ -89,7 +110,7 @@ keep_prob = 1-FLAGS.dropout_prob
 
 print('%s mode...'%str(mode))
 if mode == 'test' or mode == 'dev':
-  batch_size = 10
+  batch_size = 100
   num_epochs = 1
 
 
@@ -150,11 +171,6 @@ class Runner(object):
         feature_dirs, label_dirs = get_data(datadir, level, train_dataset, dev_dataset, test_dataset, mode)
         batchedData, maxTimeSteps, totalN = self.load_data(feature_dirs[0], label_dirs[0], mode, level)
         model = model_fn(args, maxTimeSteps)
-
-        ## shuffle feature_dir and label_dir by same order
-        FL_pair = list(zip(feature_dirs, label_dirs))
-        random.shuffle(FL_pair)
-        feature_dirs, label_dirs = zip(*FL_pair)
 
         for feature_dir, label_dir in zip(feature_dirs, label_dirs):
             id_dir = feature_dirs.index(feature_dir)
@@ -224,7 +240,7 @@ class Runner(object):
                         if er / batch_size == 1.0:
                             break
 
-                        if batch % 20 == 0:
+                        if batch % 30 == 0:
                             print('Truth:\n' + output_to_sequence(y, type=level))
                             print('Output:\n' + output_to_sequence(pre, type=level))
 

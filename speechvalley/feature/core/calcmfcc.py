@@ -1,15 +1,32 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : calcmfcc.py
-# Description  : Calculating MFCC feature for Automatic Speech Recognition
-# ******************************************************
-import numpy
-from scipy.fftpack import dct
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
 
-from speechvalley.feature.core.sigprocess import audio2frame, pre_emphasis, spectrum_power
+''' calculate mfcc feature vectors.
+author:
+
+      iiiiiiiiiiii            iiiiiiiiiiii         !!!!!!!             !!!!!!
+      #        ###            #        ###           ###        I#        #:
+      #      ###              #      I##;             ##;       ##       ##
+            ###                     ###               !##      ####      #
+           ###                     ###                 ###    ## ###    #'
+         !##;                    `##%                   ##;  ##   ###  ##
+        ###                     ###                     $## `#     ##  #
+       ###        #            ###        #              ####      ####;
+     `###        -#           ###        `#               ###       ###
+     ##############          ##############               `#         #
+
+date:2016-11-09
+
+Liujq: Add English annotations.
+date:2017-05-08
+'''
+
+
+import numpy
+from .sigprocess import audio2frame
+from .sigprocess import pre_emphasis
+from .sigprocess import spectrum_power
+from scipy.fftpack import dct
 try:
     xrange(1)
 except:

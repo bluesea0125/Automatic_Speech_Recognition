@@ -17,14 +17,6 @@ End-to-end automatic speech recognition system implemented in TensorFlow.
 - [x] **Add WSJ corpus standard preprocessing by s5 recipe** (2017-05-05)
 - [x] **Restructuring of the project. Updated train.py for usage convinience** (2017-05-06)
 - [x] **Finish feature module for timit, libri, wsj, support training for LibriSpeech** (2017-05-14)
-- [x] **Remove some unnecessary codes** (2017-07-22)
-- [x] **Add DeepSpeech2 implementation code** (2017-07-23)
-- [x] **Fix some bugs** (2017-08-06)
-- [x] **Add Layer Normalization RNN for efficiency** (2017-08-06)
-- [x] **Add Madarian Speech Recognition support** (2017-08-06)
-- [x] **Add Capsule Network Model** (2017-12-12)
-- [x] **Release 1.0.0 version** (2017-12-14)
-- [x] **Add Language Modeling Module** (2017-12-25)
 
 ## Recommendation
 If you want to replace feed dict operation with Tensorflow multi-thread and fifoqueue input pipeline, you can refer to my repo [TensorFlow-Input-Pipeline](https://github.com/zzw922cn/TensorFlow-Input-Pipeline) for more example codes. My own practices prove that fifoqueue input pipeline would improve the training speed in some time.
@@ -34,15 +26,13 @@ If you want to look the history of speech recognition, I have collected the sign
 All my public repos will be updated in future, thanks for your stars!
 
 ## Install and Usage
-Currently only python 3.5 is supported.
+Currently only python 2.7 is supported.
 
 This project depends on scikit.audiolab, for which you need to have [libsndfile](http://www.mega-nerd.com/libsndfile/) installed in your system.
-Clone the repository to your preferred directory and install using:
+Clone the repository to your preferred directory and install the dependencies using:
 <pre>
-sudo pip3 install -r requirements.txt
-sudo python3 setup.py install
+pip install -r requirements.txt
 </pre>
-
 To use, simply run the following command:
 <pre>
 python main/timit_train.py [-h] [--mode MODE] [--keep [KEEP]] [--nokeep]
@@ -90,122 +80,13 @@ optional arguments:
   --logdir LOGDIR       set the log directory
 
 </pre>
-Instead of configuration in command line, you can also set the arguments above in [timit\_train.py](https://github.com/zzw922cn/Automatic_Speech_Recognition/blob/master/main/timit_train.py) in practice.
+Instead of configuration in command line, you can also set the arguments above in [train.py](main/train.py) in practice.
 
-Besides, you can also run `main/run.sh` for both training and testing simultaneously! See [run\_timit.sh](https://github.com/zzw922cn/Automatic_Speech_Recognition/blob/master/main/run_timit.sh) for details.
+Besides, you can also run `main/run.sh` for both training and testing simultaneously! See [run.sh](main/run.sh) for details.
 
 ## Performance
 ### PER based dynamic BLSTM on TIMIT database, with casual tuning because time it limited
 ![image](https://github.com/zzw922cn/Automatic_Speech_Recognition/blob/master/PER.png)
-
-### LibriSpeech recognition result without LM
-**Label**:
-
-it was about noon when captain waverley entered the straggling village or rather hamlet of tully veolan close to which was situated the mansion of the proprietor
-
-**Prediction**:
-
-it was about noon when captain wavraly entered the stragling bilagor of rather hamlent of tulevallon close to which wi situated the mantion of the propriater
-
-
-**Label**:
-
-the english it is evident had they not been previously assured of receiving the king would never have parted with so considerable a sum and while they weakened themselves by the same measure have strengthened a people with whom they must afterwards have so material an interest to discuss
-
-**Prediction**:
-
-the onglish it is evident had they not being previously showed of receiving the king would never have parted with so considerable a some an quile they weakene themselves by the same measure haf streigth and de people with whom they must afterwards have so material and interest to discuss
-
-
-**Label**:
-
-one who writes of such an era labours under a troublesome disadvantage
-
-**Prediction**:
-
-one how rights of such an er a labours onder a troubles hom disadvantage
-
-
-**Label**:
-
-then they started on again and two hours later came in sight of the house of doctor pipt
-
-**Prediction**:
-
-then they started on again and two hours laytor came in sight of the house of doctor pipd
-
-
-**Label**:
-
-what does he want
-
-**Prediction**:
-
-whit daes he want
-
-
-**Label**:
-
-there just in front
-
-**Prediction**:
-
-there just infront
-
-
-**Label**:
-
-under ordinary circumstances the abalone is tough and unpalatable but after the deft manipulation of herbert they are tender and make a fine dish either fried as chowder or a la newberg
-
-**Prediction**:
-
-under ordinary circumstancesi the abl ony is tufgh and unpelitable but after the deftominiculation of hurbourt and they are tender and make a fine dish either fride as choder or alanuburg
-
-
-**Label**:
-
-by degrees all his happiness all his brilliancy subsided into regret and uneasiness so that his limbs lost their power his arms hung heavily by his sides and his head drooped as though he was stupefied
-
-**Prediction**:
-
-by degrees all his happiness ill his brilliancy subsited inter regret and aneasiness so that his limbs lost their power his arms hung heavily by his sides and his head druped as though he was stupified
-
-
-**Label**:
-
-i am the one to go after walt if anyone has to i'll go down mister thomas
-
-**Prediction**:
-
-i have the one to go after walt if ety wod hastu i'll go down mister thommas
-
-
-**Label**:
-
-i had to read it over carefully as the text must be absolutely correct
-
-**Prediction**:
-
-i had to readit over carefully as the tex must be absolutely correct
-
-
-**Label**:
-
-with a shout the boys dashed pell mell to meet the pack train and falling in behind the slow moving burros urged them on with derisive shouts and sundry resounding slaps on the animals flanks
-
-**Prediction**:
-
-with a shok the boy stash pale mele to meek the pecktrait ane falling in behind the slow lelicg burs ersh tlan with deressive shouts and sudery resounding sleps on the animal slankes
-
-
-**Label**:
-
-i suppose though it's too early for them then came the explosion
-
-**Prediction**:
-
-i suppouse gho waths two early for them then came the explosion
-
 
 ## Content
 This is a powerful library for **automatic speech recognition**, it is implemented in TensorFlow and support training with CPU/GPU. This library contains followings models you can choose to train your own model:
@@ -236,18 +117,18 @@ This is a powerful library for **automatic speech recognition**, it is implement
 
 The original TIMIT database contains 6300 utterances, but we find the 'SA' audio files occurs many times, it will lead bad bias for our speech recognition system. Therefore, we removed the all 'SA' files from the original dataset and attain the new TIMIT dataset, which contains only 5040 utterances including 3696 standard training set and 1344 test set.
 
-Automatic Speech Recognition transcribes a raw audio file into character sequences; the preprocessing stage converts a raw audio file into feature vectors of several frames. We first split each audio file into 20ms Hamming windows with an overlap of 10ms, and then calculate the 12 mel frequency ceptral coefficients, appending an energy variable to each frame. This results in a vector of length 13. We then calculate the delta coefficients and delta-delta coefficients, attaining a total of 39 coefficients for each frame. In other words, each audio file is split into frames using the Hamming windows function, and each frame is extracted to a feature vector of length 39 (to attain a feature vector of different length, modify the settings in the file [timit\_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit/timit_preprocess.py).
+Automatic Speech Recognition transcribes a raw audio file into character sequences; the preprocessing stage converts a raw audio file into feature vectors of several frames. We first split each audio file into 20ms Hamming windows with an overlap of 10ms, and then calculate the 12 mel frequency ceptral coefficients, appending an energy variable to each frame. This results in a vector of length 13. We then calculate the delta coefficients and delta-delta coefficients, attaining a total of 39 coefficients for each frame. In other words, each audio file is split into frames using the Hamming windows function, and each frame is extracted to a feature vector of length 39 (to attain a feature vector of different length, modify the settings in the file [timit\_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
 
 In folder data/mfcc, each file is a feature matrix with size timeLength\*39 of one audio file; in folder data/label, each file is a label vector according to the mfcc file.
 
-If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/core/calcmfcc.py) or [timit\_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit/timit_preprocess.py).
+If you want to set your own data preprocessing, you can edit [calcmfcc.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/calcmfcc.py) or [timit\_preprocess.py](https://github.com/zzw922cn/Automatic-Speech-Recognition/blob/master/src/feature/timit_preprocess.py).
 
 The original TIMIT dataset contains 61 phonemes, we use 61 phonemes for training and evaluation, but when scoring, we mappd the 61 phonemes into 39 phonemes for better performance. We do this mapping according to the paper [Speaker-independent phone recognition using hidden Markov models](http://repository.cmu.edu/cgi/viewcontent.cgi?article=2768&context=compsci). The mapping details are as follows:
 
 | Original Phoneme(s) | Mapped Phoneme |
 | :------------------  | :-------------------: |
 | iy | iy |
-| ix, ih | ix |
+| ih | ix |
 | eh | eh |
 | ae | ae |
 | ax, ah, ax-h | ax | 
@@ -395,10 +276,11 @@ TODO
 + TIMIT Phoneme Edit Distance(PER)
 
 ## Future Work
-- [ ] Release pretrained English ASR model
 - [ ] Add Attention Mechanism
-- [ ] Add Speaker Verification
-- [ ] Add TTS
+- [ ] Add more efficient dynamic computation graph without padding
+- [ ] List experimental results 
+- [ ] Implement more ASR models following newest investigations 
+- [ ] Provide fast TensorFlow Input Pipeline 
 
 ## License
 MIT
@@ -411,8 +293,6 @@ For any questions, welcome to send email to :**zzw922cn@gmail.com**.
 Collaborators: 
 
 [zzw922cn](https://github.com/zzw922cn)
-
-[deepxuexi](https://github.com/deepxuexi)
 
 [hiteshpaul](https://github.com/hiteshpaul)
 

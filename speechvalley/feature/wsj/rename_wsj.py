@@ -1,17 +1,25 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : rename_wsj.py
-# Description  : Renaming some folders for WSJ dataset
-# ******************************************************
+#-*- coding:utf-8 -*-
+#!/usr/bin/python
+''' Preprocessing for WSJ speech corpus
+author:
+zzw922cn
+     
+date:2017-4-15
+'''
+
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import sys
+sys.path.append('../')
+sys.dont_write_bytecode = True
 
 import subprocess
 import os
 
 def lookup(cd_id, logfile):
   # find new name according to indexing
+
   with open(logfile, 'r') as f:
     content = f.readlines()
   for line in content:

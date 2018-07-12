@@ -1,0 +1,44 @@
+# by junjing
+# 2018.07.12
+
+######################################################################################
+# 				Tips 						     #
+######################################################################################
+1.timit database  consists of 4 kinds of files:.PHN,.WAV,.TXT,.WRD
+2.speechvalley accepts only feature(mfcc) and phoneme(label) which exist in .npy format. 
+  So you should preprocess timit database so that speechvalley-acceptable format data are prepared.
+3.You should pay attention to input/output path, configuration such as batch size, level,... 
+  in the following files. Open them and Read Carefully.
+speechvalley/feature/timit/timit_preprocess.py
+speechvalley/main/timit_train.py
+
+######################################################################################
+# 				Guide					             #
+######################################################################################
+1. Installation
+2. Preprocessing
+3. Train/Test
+
+### 1. Installation
+
+python2.7/python3.5+
+
+$ root=$(pwd)
+$ sudo apt-get install libsndfile1-dev
+$ pip install numpy
+$ pip install -r requirements.txt
+$ python setup.py install
+
+### 2. Preprocessing
+
+$ cd speechvalley/feature/timit
+$ python timit_preprocess.py
+
+### 3. Train/Test
+
+$ cd $root
+$ cd speechvalley/main
+train
+$ python timit_train.py --mode=train
+test
+$ python timit_train.py --mode=test
