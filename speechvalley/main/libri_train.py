@@ -70,8 +70,8 @@ flags.DEFINE_integer('num_epochs', 1, 'set the number of epochs')
 flags.DEFINE_float('lr', 0.0001, 'set the learning rate')
 flags.DEFINE_float('dropout_prob', 0.1, 'set probability of dropout')
 flags.DEFINE_float('grad_clip', 1, 'set the threshold of gradient clipping, -1 denotes no clipping')
-flags.DEFINE_string('datadir', '/home/pony/github/data/libri', 'set the data root directory')
-flags.DEFINE_string('logdir', '/home/pony/github/log/libri', 'set the log directory')
+flags.DEFINE_string('datadir', '/home/frank/github/data/LIBRI/DATA', 'set the data root directory')
+flags.DEFINE_string('logdir', '/home/frank/github/log/libri', 'set the log directory')
 
 
 FLAGS = flags.FLAGS
@@ -110,7 +110,7 @@ keep_prob = 1-FLAGS.dropout_prob
 
 print('%s mode...'%str(mode))
 if mode == 'test' or mode == 'dev':
-  batch_size = 100
+  batch_size = 8#100#junying-todo
   num_epochs = 1
 
 

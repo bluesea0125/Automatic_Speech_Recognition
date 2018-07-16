@@ -1,4 +1,4 @@
-# by junjing
+# by junying
 # 2018.07.12
 
 ######################################################################################
@@ -9,8 +9,10 @@
   So you should preprocess timit database so that speechvalley-acceptable format data are prepared.
 3.You should pay attention to input/output path, configuration such as batch size, level,... 
   in the following files. Open them and Read Carefully.
+-timit
 speechvalley/feature/timit/timit_preprocess.py
 speechvalley/main/timit_train.py
+-libri
 
 ######################################################################################
 # 				Guide					             #
@@ -30,15 +32,25 @@ $ pip install -r requirements.txt
 $ python setup.py install
 
 ### 2. Preprocessing
-
+[timit]
 $ cd speechvalley/feature/timit
-$ python timit_preprocess.py
-
+$ python timit_preprocess.py --path /home/frank/github/data/TIMIT --save /home/frank/github/data/TIMIT/DATA
+[libri]
+$ cd speechvalley/feature/libri
+$ python libri_preprocess.py --path /home/frank/github/data/LIBRI --save /home/frank/github/data/LIBRI/DATA
 ### 3. Train/Test
 
 $ cd $root
 $ cd speechvalley/main
+[timit]
 train
 $ python timit_train.py --mode=train
 test
 $ python timit_train.py --mode=test
+[libri]
+train
+python libri_train.py --mode=train
+test
+$ python libri_train.py --mode=test
+dev
+python libri_train.py --mode=dev

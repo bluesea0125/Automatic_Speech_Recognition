@@ -19,9 +19,9 @@ from core.calcmfcc import calcfeat_delta_delta
 import scipy.io.wavfile as wav
 import numpy as np
 import os
-import cPickle
-import glob
-import sklearn
+#import cPickle
+#import glob
+#import sklearn
 import argparse
 from sklearn import preprocessing
 from subprocess import check_call, CalledProcessError
@@ -68,6 +68,7 @@ def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, f
     dirid = 0
     level = 'cha' if seq2seq is False else 'seq2seq'
     data_dir = os.path.join(root_directory, name)
+    print(data_dir)
     preprocess(data_dir)
     for subdir, dirs, files in os.walk(data_dir):
         for f in files:
@@ -125,9 +126,9 @@ def wav2feature(root_directory, save_directory, name, win_len, win_step, mode, f
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='libri_preprocess',
                                      description='Script to preprocess libri data')
-    parser.add_argument("path", help="Directory of LibriSpeech dataset", type=str)
+    parser.add_argument("--path", help="Directory of LibriSpeech dataset", type=str)
 
-    parser.add_argument("save", help="Directory where preprocessed arrays are to be saved",
+    parser.add_argument("--save", help="Directory where preprocessed arrays are to be saved",
                         type=str)
     parser.add_argument("-n", "--name", help="Name of the dataset",
                         choices=['dev-clean', 'dev-other', 'test-clean',
@@ -157,6 +158,7 @@ if __name__ == "__main__":
     win_len = args.winlen
     win_step = args.winstep
 
+    print(root_directory,save_directory)
     if root_directory == '.':
         root_directory = os.getcwd()
 
